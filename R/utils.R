@@ -33,8 +33,25 @@ shrink_gpkg <- function(dsn = NULL, backup = NULL) {
   ## check file size before size reduction
   size.after <- file.info(dsn)[["size"]]
 
-  message("VACUUM completed:\n",
-          "Initial size: ", size.before, "\n",
-          "Resulting size: ", size.after, "\n",
-          "Reduction by: ", round(100 * (1 - (size.after/size.before)),2), "%")
+  message(
+    "File: ", dsn, "\n",
+    "VACUUM completed:\n",
+    "Initial size: ", size.before, "\n",
+    "Resulting size: ", size.after, "\n",
+    "Reduction by: ", round(100 * (1 - (size.after/size.before)),2), "%\n")
+}
+
+
+#' Batch apply \link{shrink_gpkg} to all geopackage files within a folder
+#' @description
+#' See \link{shrink_gpkg} for details
+#'
+#' @param path path
+#' @param recursive boolean
+#' @export
+#'
+shrink_gpkg_batch <- function(path = NULL, recursive = FALSE) {
+if (!dir.exists(path)) stop("Provide valid path. ", path, " does not exist")
+  gpkg <- list.files(path, pattern = ".gpkg", full.names = T, recursive = recursive)
+  out <- sapply(gpkg, shrink_gpkg)
 }
