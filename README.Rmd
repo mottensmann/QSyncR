@@ -1,0 +1,51 @@
+---
+output: github_document
+html_preview: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.width = 6,
+  fig.height = 6,
+  dpi = 300,
+  tidy = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "inst/README-"
+)
+```
+
+## `GeoPackageR` package
+___
+
+This package provides a few simple workflows for cleaning, checking and maintaining [GeoPackage](https://www.geopackage.org/) databases that are used in [QGIS](https://qgis.org/).
+
+*In development*
+
+To install the package, use [devtools](https://github.com/r-lib/devtools):
+
+```{r Install-GeoPackageR, eval=FALSE}
+devtools::install_github("mottensmann/GeoPackageR")
+```
+
+Load the package once installed:
+
+```{r load-GeoPackageR, warning=FALSE, results='hide'}
+library(GeoPackageR)
+```
+
+## Functions
+
+### `shrink_gpkg`
+
+[SQLite](https://sqlite.org/), the underlying database format for `GeoPackage`, does *not* release unused space back to the filesystem by default. Hence, there is the need to *vacuum* the database in or to reclaim space. This is especially useful when, for example many features where deleted and the file size remained more or less constant.
+
+```{r}
+## Example 
+shrink_gpkg(dsn = "~/GIS/QField/Backups/Avifauna.gpkg")
+```
+
+

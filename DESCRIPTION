@@ -1,0 +1,21 @@
+Package: GeoPackageR
+Type: Package
+Title: Collection of some function to clean and maintain GeoPackage databases
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Meinolf", "Ottensmann",
+      email = "meinolf.ottensmann@web.de",
+      role = c("aut", "cre")
+    )
+  )
+Description: GeoPackageR contains a few routines to clean, check and maintain geopackage databases. Among other functions it allows to:
+    (1) Using VACUUM to GeoPackage size on the disk.
+    (2) More to come ...
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+Imports: 
+    DBI,
+    RSQLite
