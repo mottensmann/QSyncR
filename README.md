@@ -175,3 +175,12 @@ url = c("https://dop20-rgb.s3.eu-de.cloud-object-storage.appdomain.cloud/3245657
     "https://dop20-rgb.s3.eu-de.cloud-object-storage.appdomain.cloud/324525776/2014-05-03/dop20rgb_32_452_5776_2_ni_2014-05-03.tif")
 download_raster(url, filename = basename(url), dest = "output_folder")
 ```
+
+### `compare.DCIM`
+
+Quickly compare which attachments in `DCIM` are new in a [QFieldCloud
+Project](app.qfield.cloud/)
+
+``` r
+out <- compare.DCIM(path_qfield = "~/GIS/QField/cloud/dachverband/Laubfrosch", path_local = "~/GIS/QField/cloud/Backup/laubfrosch/")
+```

@@ -2,6 +2,7 @@
 
 export(VACUUM)
 export(VACUUM.batch)
+export(compare.DCIM)
 export(download_raster)
 export(sync)
 importFrom(DBI,dbConnect)

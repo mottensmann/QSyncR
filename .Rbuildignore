@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 README.RMD
 ^LICENSE\.md$
+^\.positai$
+^\.claude$
