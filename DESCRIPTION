@@ -18,4 +18,8 @@ LazyData: true
 RoxygenNote: 7.3.3
 Imports: 
     DBI,
-    RSQLite
+    dplyr,
+    gdalUtilities,
+    RSQLite,
+    sf,
+    stringr

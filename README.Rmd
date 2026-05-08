@@ -115,4 +115,3 @@ Quickly compare which attachments in `DCIM` are new in a [QFieldCloud Project](a
 out <- compare.DCIM(path_qfield = "~/GIS/QField/cloud/dachverband/Laubfrosch",
                     path_local = '~/GIS/QField/cloud/Backup/laubfrosch/')
 ```
-

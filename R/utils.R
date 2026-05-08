@@ -135,3 +135,96 @@ compare.DCIM <- function(path_qfield = NULL, path_local = NULL) {
 
   return(out)
 }
+
+#' Build MBTiles from a directory of TIFF files
+#'
+#' @description
+#' Builds a VRT mosaic from a directory of TIFF files and converts it to an
+#' MBTiles file. Optionally clips to a bounding box before conversion, and
+#' adds overview levels (zoom pyramid) via \code{gdaladdo}.
+#'
+#' @param input Character. Folder containing TIFF files.
+#' @param mbtiles Character. Path for the output MBTiles file.
+#' @param extent Optional numeric vector \code{c(xmin, ymin, xmax, ymax)}.
+#'   Clips the VRT to this bounding box before conversion. Must be in the
+#'   same CRS as the input rasters.
+#' @param zoom_level Optional integer. Maximum zoom level written to the
+#'   MBTiles. If \code{NULL}, GDAL determines this automatically from the
+#'   input resolution.
+#' @param overviews Logical (default \code{TRUE}). If \code{TRUE}, runs
+#'   \code{gdaladdo} after translation to build zoom-level overviews inside
+#'   the MBTiles (powers of 2 up to level 11).
+#' @param format Character. Tile image format: \code{"PNG"} (lossless,
+#'   default) or \code{"JPEG"} (lossy, smaller file).
+#' @param pattern Character. Regex pattern for selecting files in
+#'   \code{input} (default \code{"\\\\.tif$"}).
+#' @param recursive Logical. Search for TIFFs recursively? (default
+#'   \code{FALSE}).
+#' @keywords experimental
+#'
+build.mbtiles <- function(input       = '~/GIS/GeoTiff/dgk5',
+                          mbtiles     = '~/GIS/GeoTiff/dgk5.mbtiles',
+                          extent      = NULL,
+                          zoom_level  = NULL,
+                          overviews   = TRUE,
+                          format = "PNG",
+                          pattern     = "\\.tif$",
+                          recursive   = FALSE) {
+
+  ## set paramameters
+  if (is.null(mbtiles)) stop('Set output for mbtiles')
+  # Expand ~ so GDAL CLI receives absolute paths on Windows
+  mbtiles <- path.expand(mbtiles)
+  input   <- path.expand(input)
+  vrt = stringr::str_replace(mbtiles, 'mbtiles', 'vrt')
+
+  ## Discover TIFFs
+  tifs <- list.files(input, pattern = pattern, full.names = TRUE, recursive = recursive)
+  if (length(tifs) == 0) stop("No TIFF files found in: ", input)
+  message("Found ", length(tifs), " TIFF file(s).")
+
+  ## Build VRT (optionally clipped to extent)
+  ## Delete existing VRT first; -overwrite is not supported by the GDAL API
+  if (file.exists(vrt)) file.remove(vrt)
+  vrt_args <- list(gdalfile   = tifs,
+                   output.vrt = vrt)
+  if (!is.null(extent)) {
+    if (length(extent) != 4) {
+      stop("`extent` must be a numeric vector of length 4: c(xmin, ymin, xmax, ymax)")
+    }
+    vrt_args$te <- extent  # gdalbuildvrt -te xmin ymin xmax ymax
+    message("Clipping VRT to extent: xmin=", extent[1], " ymin=", extent[2],
+            " xmax=", extent[3], " ymax=", extent[4])
+  }
+  message("Building VRT...")
+  do.call(gdalUtilities::gdalbuildvrt, vrt_args)
+
+  ## Translate VRT -> MBTiles
+  co <- paste0("TILE_FORMAT=", toupper(format))
+  if (!is.null(zoom_level)) {
+    co <- c(co, paste0("ZOOM_LEVEL=", as.integer(zoom_level)))
+  }
+
+  message("Converting VRT to MBTiles (format: ", format, ")...")
+  gdalUtilities::gdal_translate(
+    src_dataset = vrt,
+    dst_dataset = mbtiles,
+    of          = "MBTiles",
+    co          = co
+  )
+
+  ## Build zoom-level overviews inside MBTiles
+  if (overviews) {
+    message("Building overviews (zoom pyramid)...")
+    ov_levels <- as.character(2^(1:11))  # "2" "4" "8" ... "2048"
+    sf::gdal_utils(
+      util    = "addo",
+      source  = mbtiles,
+      options = c("-r", "average", ov_levels)
+    )
+  }
+
+  message("Done! MBTiles written to: ", mbtiles)
+  invisible(mbtiles)
+}
+
